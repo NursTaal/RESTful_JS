@@ -2,16 +2,20 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.dto.RoleDTO;
 import ru.kata.spring.boot_security.demo.dto.UserDTO;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
+import ru.kata.spring.boot_security.demo.util.UserNotCreatedException;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,10 +34,9 @@ public class AdminController {
 
     @GetMapping()
     public List<UserDTO> printAllUsers() {
-        return userService.getListOfUsers().stream().
-                map(this::convertToUserDTO).collect(Collectors.toList());
+        return userService.getListOfUsers().stream()
+                .map(this::convertToUserDTO).collect(Collectors.toList());
     }
-
 
 
     @GetMapping("/new")
@@ -43,15 +46,23 @@ public class AdminController {
     }
 
     @PostMapping()
-    public String creat(@ModelAttribute("user") User user) {
-        userService.saveUser(user);
-        return "redirect:/admin";
-    }
+    public ResponseEntity<HttpStatus> creat(@RequestBody @Valid UserDTO userDTO, BindingResult bindingResult) {
 
-    @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") long id) {
-        model.addAttribute("user", userService.getUserById(id));
-        return "edit";
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = bindingResult.getFieldErrors();
+
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" - ").append(error.getDefaultMessage())
+                        .append(";");
+            }
+            throw new UserNotCreatedException(errorMsg.toString());
+        }
+
+        userService.saveUser(convertToUser(userDTO));
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")
