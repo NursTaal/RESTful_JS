@@ -24,7 +24,8 @@ public class UserServiceImp implements UserService, UserDetailsService {
 
     private final RoleRepository roleRepository;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
 
     @Autowired
     public UserServiceImp(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository, RoleRepository roleRepository) {
@@ -55,10 +56,9 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     public void updateUser(User user) {
         String pass = user.getPassword();
-        if (pass.isEmpty()){
+        if (pass.isEmpty()) {
             user.setPassword(userRepository.findById(user.getId()).get().getPassword());
-        }
-        else{
+        } else {
             user.setPassword(bCryptPasswordEncoder.encode(pass));
         }
         userRepository.save(user);
@@ -81,7 +81,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     public void saveRole(Role role) {
         if (roleRepository.findByName(role.getName()).isEmpty()) {
             roleRepository.save(role);
-        } else{
+        } else {
             role = roleRepository.findByName(role.getName()).get();
         }
     }
@@ -105,11 +105,11 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
 
-    @Transactional(propagation= Propagation.REQUIRED, readOnly=true, noRollbackFor=Exception.class)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true, noRollbackFor = Exception.class)
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByEmail(username);
-        for (Role role: user.get().getRoles()){
+        for (Role role : user.get().getRoles()) {
             System.out.println(role.getName());
         }
         if (user.isEmpty()) {
@@ -117,7 +117,6 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
         return user.get();
     }
-
 
 
 }

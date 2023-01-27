@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.mapping.Collection;
 import org.springframework.security.core.GrantedAuthority;
 

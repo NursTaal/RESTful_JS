@@ -42,10 +42,10 @@ public class RegistrationController {
         }
         System.out.println("1");
 
-        if (!userForm.getPassword().equals(userForm.getConfirm())) {
-            model.addAttribute("passwordError", "Пароли не совпадают");
-            return "registration";
-        }
+//        if (!userForm.getPassword().equals(userForm.getConfirm())) {
+//            model.addAttribute("passwordError", "Пароли не совпадают");
+//            return "registration";
+//        }
         System.out.println("12");
 
         if (!userService.saveUser(userForm)) {
