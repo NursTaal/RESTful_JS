@@ -86,6 +86,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
     }
 
+    @Transactional
     @Override
     public void saveRoleUser(User user, Role role) {
         Role role1 = roleRepository.findByName(role.getName()).get();
@@ -99,6 +100,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         return !userRepository.findByEmail(username).isEmpty();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<Role> getAllRoles() {
         return roleRepository.findAll();

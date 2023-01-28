@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.configs;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,9 +27,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/**").permitAll()
-                .and()
+        http
+//                .authorizeRequests()
+//                .antMatchers("/**").permitAll()
+//                .and()
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "/index", "/roles/**").permitAll()
@@ -42,6 +44,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .logout().logoutSuccessUrl("/")
                 .permitAll();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 
     @Bean

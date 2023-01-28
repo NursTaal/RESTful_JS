@@ -1,6 +1,8 @@
 package ru.kata.spring.boot_security.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.mapping.Collection;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -11,6 +13,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "roles")
+@JsonIdentityInfo(generator= ObjectIdGenerators.IntSequenceGenerator.class, property="@roleId")
 public class Role implements GrantedAuthority  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
@@ -19,6 +22,7 @@ public class Role implements GrantedAuthority  {
     @Column(name = "name",unique = true)
     private String name;
 
+    @Transient
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
@@ -47,7 +51,8 @@ public class Role implements GrantedAuthority  {
     }
 
     public String getName() {
-
+        System.out.println(this.id);
+        System.out.println(this.name);
         return name.split("_")[1];
     }
 

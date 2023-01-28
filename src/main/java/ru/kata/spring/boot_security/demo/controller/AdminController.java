@@ -2,21 +2,20 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import ru.kata.spring.boot_security.demo.dto.RoleDTO;
 import ru.kata.spring.boot_security.demo.dto.UserDTO;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import ru.kata.spring.boot_security.demo.util.UserNotCreatedException;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,49 +31,55 @@ public class AdminController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping()
-    public List<UserDTO> printAllUsers() {
-        return userService.getListOfUsers().stream()
-                .map(this::convertToUserDTO).collect(Collectors.toList());
+    @GetMapping("/users")
+    public ModelAndView getPage() {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("allUsers"); // maybe change "AllUsers.html"
+        return modelAndView;
     }
 
+    @GetMapping()
+    public Map<String,Object> printAllUsers() {
+        Map<String, Object> getMap = new HashMap<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserDTO admin = convertToUserDTO((User) auth.getPrincipal());
+        List<RoleDTO> roles = userService.getAllRoles().stream()
+                .map(this::convertToRoleDTO).collect(Collectors.toList());
 
-    @GetMapping("/new")
-    public String newUser(Model model) {
-        model.addAttribute("user", new User());
-        return "newUser";
+        List<UserDTO> users = userService.getListOfUsers().stream()
+                .map(this::convertToUserDTO).collect(Collectors.toList());
+
+        getMap.put("admin",admin);
+        getMap.put("users",users);
+        getMap.put("roles", roles);
+        return getMap;
+
+//        return userService.getListOfUsers().stream().
+//                map(this::convertToUserDTO).collect(Collectors.toList());
+    }
+
+    @GetMapping("/{id}")
+    public UserDTO user(@PathVariable("id") long id) {
+        return convertToUserDTO(userService.getUserById(id));
     }
 
     @PostMapping()
-    public ResponseEntity<HttpStatus> creat(@RequestBody @Valid UserDTO userDTO, BindingResult bindingResult) {
+    public Map<String, Object> creat(@RequestBody @Valid User userDTO) {
+        userService.saveUser(userDTO);
 
-        if (bindingResult.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ").append(error.getDefaultMessage())
-                        .append(";");
-            }
-            throw new UserNotCreatedException(errorMsg.toString());
-        }
-
-        userService.saveUser(convertToUser(userDTO));
-
-        return ResponseEntity.ok(HttpStatus.OK);
+        return printAllUsers();
     }
 
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute("user") User user) {
-        userService.updateUser(user);
-        return "redirect:/admin";
+    public Map<String,Object> update(@RequestBody UserDTO user) {
+        userService.updateUser(convertToUser(user));
+        return printAllUsers();
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") long id) {
+    public Map<String,Object> delete(@PathVariable("id") long id) {
         userService.deleteUser(id);
-        return "redirect:/admin";
+        return printAllUsers();
     }
 
     private UserDTO convertToUserDTO(User user) {

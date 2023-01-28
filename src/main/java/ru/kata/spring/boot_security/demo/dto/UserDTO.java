@@ -93,4 +93,18 @@ public class UserDTO {
     public void setRoles(Set<RoleDTO> roles) {
         this.roles = roles;
     }
+
+    @Override
+    public String toString() {
+        return "UserDTO{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", confirm='" + confirm + '\'' +
+                ", roles=" + roles +
+                '}';
+    }
 }
