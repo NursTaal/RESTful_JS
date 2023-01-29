@@ -2,6 +2,8 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +41,7 @@ public class AdminController {
     }
 
     @GetMapping()
-    public Map<String,Object> printAllUsers() {
+    public ResponseEntity<Map<String ,Object>> printAllUsers() {
         Map<String, Object> getMap = new HashMap<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserDTO admin = convertToUserDTO((User) auth.getPrincipal());
@@ -52,34 +54,31 @@ public class AdminController {
         getMap.put("admin",admin);
         getMap.put("users",users);
         getMap.put("roles", roles);
-        return getMap;
-
-//        return userService.getListOfUsers().stream().
-//                map(this::convertToUserDTO).collect(Collectors.toList());
+        return new ResponseEntity<>(getMap, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public UserDTO user(@PathVariable("id") long id) {
-        return convertToUserDTO(userService.getUserById(id));
+    public ResponseEntity<UserDTO> user(@PathVariable("id") long id) {
+        return new ResponseEntity<>(convertToUserDTO(userService.getUserById(id)), HttpStatus.OK);
     }
 
     @PostMapping()
-    public Map<String, Object> creat(@RequestBody @Valid User userDTO) {
+    public ResponseEntity<?> creat(@RequestBody @Valid User userDTO) {
         userService.saveUser(userDTO);
 
-        return printAllUsers();
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public Map<String,Object> update(@RequestBody UserDTO user) {
+    public ResponseEntity<?> update(@RequestBody UserDTO user) {
         userService.updateUser(convertToUser(user));
-        return printAllUsers();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public Map<String,Object> delete(@PathVariable("id") long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") long id) {
         userService.deleteUser(id);
-        return printAllUsers();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private UserDTO convertToUserDTO(User user) {
