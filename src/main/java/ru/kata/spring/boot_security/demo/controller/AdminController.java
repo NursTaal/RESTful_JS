@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.controller;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,9 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import ru.kata.spring.boot_security.demo.dto.MapperUserRole;
 import ru.kata.spring.boot_security.demo.dto.RoleDTO;
 import ru.kata.spring.boot_security.demo.dto.UserDTO;
-import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
@@ -25,12 +24,12 @@ import java.util.stream.Collectors;
 public class AdminController {
 
     private final UserService userService;
-    private final ModelMapper modelMapper;
+    private final MapperUserRole mapper;
 
     @Autowired
-    public AdminController(UserService userService, ModelMapper modelMapper) {
+    public AdminController(UserService userService, MapperUserRole mapper) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
+        this.mapper = mapper;
     }
 
     @GetMapping("/users")
@@ -44,12 +43,12 @@ public class AdminController {
     public ResponseEntity<Map<String ,Object>> printAllUsers() {
         Map<String, Object> getMap = new HashMap<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserDTO admin = convertToUserDTO((User) auth.getPrincipal());
+        UserDTO admin = mapper.convertToUserDTO((User) auth.getPrincipal());
         List<RoleDTO> roles = userService.getAllRoles().stream()
-                .map(this::convertToRoleDTO).collect(Collectors.toList());
+                .map(mapper::convertToRoleDTO).collect(Collectors.toList());
 
         List<UserDTO> users = userService.getListOfUsers().stream()
-                .map(this::convertToUserDTO).collect(Collectors.toList());
+                .map(mapper::convertToUserDTO).collect(Collectors.toList());
 
         getMap.put("admin",admin);
         getMap.put("users",users);
@@ -59,7 +58,7 @@ public class AdminController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> user(@PathVariable("id") long id) {
-        return new ResponseEntity<>(convertToUserDTO(userService.getUserById(id)), HttpStatus.OK);
+        return new ResponseEntity<>(mapper.convertToUserDTO(userService.getUserById(id)), HttpStatus.OK);
     }
 
     @PostMapping()
@@ -71,7 +70,7 @@ public class AdminController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<HttpStatus> update(@RequestBody UserDTO user) {
-        userService.updateUser(convertToUser(user));
+        userService.updateUser(mapper.convertToUser(user));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -79,18 +78,6 @@ public class AdminController {
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") long id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    private UserDTO convertToUserDTO(User user) {
-        return modelMapper.map(user, UserDTO.class);
-    }
-
-    private User convertToUser(UserDTO user) {
-        return modelMapper.map(user, User.class);
-    }
-
-    private RoleDTO convertToRoleDTO(Role role) {
-        return modelMapper.map(role, RoleDTO.class);
     }
 
 }
