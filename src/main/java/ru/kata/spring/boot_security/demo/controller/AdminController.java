@@ -33,10 +33,10 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ModelAndView getPage() {
+    public ResponseEntity<ModelAndView> getPage() {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("allUsers"); // maybe change "AllUsers.html"
-        return modelAndView;
+        return new ResponseEntity<>(modelAndView,HttpStatus.OK);
     }
 
     @GetMapping()
