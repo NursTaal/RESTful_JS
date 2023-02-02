@@ -50,6 +50,8 @@ public class Role implements GrantedAuthority  {
         this.id = id;
     }
 
+    public String getFullName() {return name;}
+
     public String getName() {
         System.out.println(this.id);
         System.out.println(this.name);
@@ -77,7 +79,5 @@ public class Role implements GrantedAuthority  {
     public String toString() {
         return name.split("_")[1];
     }
-    public Set<Role> getSingleton(){
-        return Collections.singleton(new Role(name));
-    }
+
 }
