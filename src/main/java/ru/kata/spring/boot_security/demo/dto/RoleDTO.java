@@ -1,6 +1,10 @@
 package ru.kata.spring.boot_security.demo.dto;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
+@Data
 public class RoleDTO {
 
     private Long id;
@@ -13,10 +17,6 @@ public class RoleDTO {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void setName(String name) {
