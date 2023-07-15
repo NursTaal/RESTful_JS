@@ -35,13 +35,13 @@ public class UserServiceImp implements UserService, UserDetailsService {
         this.roleRepository = roleRepository;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     @Override
     public User getUserById(long id) {
         return userRepository.findById(id).get();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public boolean saveUser(User user) {
         if (!userRepository.findByEmail(user.getEmail()).isEmpty()) {
@@ -52,7 +52,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         return true;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void updateUser(User user) {
         String pass = user.getPassword();
@@ -64,7 +64,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         userRepository.save(user);
     }
 
-    @Transactional()
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void deleteUser(long id) {
         userRepository.deleteById(id);
@@ -76,7 +76,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         return userRepository.findAll();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void saveRole(Role role) {
         if (roleRepository.findByName(role.getName()).isEmpty()) {
@@ -86,7 +86,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public void saveRoleUser(User user, Role role) {
         Role role1 = roleRepository.findByName(role.getName()).get();
